@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+{% set extra_qs = '&account=' ~ f_account ~ '&category=' ~ f_category ~ '&q=' ~ (q|urlencode) %}
+{% include "_month_nav.html" %}
+
+<form method="get" class="filters">
+  <input type="hidden" name="month" value="{{ month }}">
+  <select name="account" onchange="this.form.submit()">
+    <option value="">كل الحسابات</option>
+    {% for a in accounts %}<option value="{{ a.id }}" {{ 'selected' if f_account == a.id|string }}>{{ a.name }}</option>{% endfor %}
+  </select>
+  <select name="category" onchange="this.form.submit()">
+    <option value="">كل الفئات</option>
+    <option value="none" {{ 'selected' if f_category == 'none' }}>بدون تصنيف</option>
+    {% for c in categories %}<option value="{{ c.id }}" {{ 'selected' if f_category == c.id|string }}>{{ c.name }}</option>{% endfor %}
+  </select>
+  <input type="search" name="q" value="{{ q }}" placeholder="دوّر…">
+</form>
+
+<section class="card">
+  {% set total_out = rows|selectattr('amount', 'lt', 0)|sum(attribute='amount') %}
+  {% set total_in = rows|selectattr('amount', 'gt', 0)|sum(attribute='amount') %}
+  <p class="muted small">{{ rows|length }} معاملة{% if f_account %} · داخل <span dir="ltr">{{ total_in|money(rows[0].currency if rows else 'TRY') }}</span> · طالع <span dir="ltr">{{ total_out|money(rows[0].currency if rows else 'TRY') }}</span>{% endif %}</p>
+  <ul class="tx-list">{% for t in rows %}{% include "_tx_row.html" %}{% else %}<li class="muted">ما في معاملات.</li>{% endfor %}</ul>
+</section>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card narrow">
+  <h1>استيراد كشف حساب</h1>
+  <p class="muted">نزّل حركات الحساب من الإنترنت بانكنغ كملف <b>Excel</b> (أو CSV)، وارفعه هون. المعاملات اللي استوردتها قبل ما بتتكرّر.</p>
+  <form method="post" enctype="multipart/form-data" class="stack">
+    <label>الحساب
+      <select name="account_id">{% for a in accounts %}<option value="{{ a.id }}">{{ a.name }} ({{ a.currency }})</option>{% endfor %}</select>
+    </label>
+    <label>الملف<input type="file" name="file" accept=".xlsx,.xls,.csv,.txt" required></label>
+    <button>معاينة</button>
+  </form>
+  <details>
+    <summary>كيف أنزّل الكشف؟ (الأسماء تقريبية، ممكن تختلف شوي)</summary>
+    <ul class="small">
+      <li><b>Kuveyt Türk:</b> İnternet Şube ← Hesaplarım ← Hesap Hareketleri ← اختار التاريخ ← زر Excel.</li>
+      <li><b>VakıfBank:</b> İnternet Şube ← Hesaplar ← Hesap Hareketleri ← Excel'e Aktar.</li>
+      <li>إذا التطبيق بيعطي PDF بس، جرّب من موقع الإنترنت بانكنغ على الماك، عادةً فيه Excel.</li>
+      <li>🔒 البرنامج بيقرأ الملف على جهازك بس، وما بيبعته لأي مكان.</li>
+    </ul>
+  </details>
+</section>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card narrow">
+  <h1>أهلًا 👋</h1>
+  <p class="muted">اختار رمز دخول (PIN) للتطبيق. هاد مش رمز البنك، وما تستعمل رمز البنك هون أبدًا.</p>
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  <form method="post" class="stack">
+    <label>الرمز<input type="password" name="pin" inputmode="numeric" autocomplete="new-password" minlength="4" required autofocus></label>
+    <label>أعد الرمز<input type="password" name="pin2" inputmode="numeric" autocomplete="new-password" minlength="4" required></label>
+    <button>ابدأ</button>
+  </form>
+</section>
+{% endblock %}

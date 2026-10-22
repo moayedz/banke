@@ -1,0 +1,10 @@
+<li class="tx">
+  <a href="/transactions/{{ t.id }}/edit">
+    <span class="dot" style="background: {{ t.color or '#bdbdbd' }}"></span>
+    <span class="tx-main">
+      <span class="tx-desc">{{ t.description or t.note or '—' }}</span>
+      <span class="tx-meta">{{ t.date }} · {{ t.account_name }} · {{ t.category_name or 'بدون تصنيف' }}</span>
+    </span>
+    <span class="tx-amount {{ 'pos' if t.amount > 0 else 'neg' }}" dir="ltr">{{ t.amount|money(t.currency) }}</span>
+  </a>
+</li>

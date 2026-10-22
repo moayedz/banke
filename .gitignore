@@ -1,0 +1,10 @@
+# بياناتك المالية — عمرها ما بتنرفع على GitHub
+data/
+*.db
+*.db-journal
+
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store

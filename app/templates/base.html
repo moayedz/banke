@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f766e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="بنكي">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/static/icon-180.png">
+  <link rel="stylesheet" href="/static/style.css">
+  <title>{% block title %}بنكي{% endblock %}</title>
+</head>
+<body>
+  {% if request.session.get('auth') %}
+  <header class="topbar">
+    <a href="/" class="brand">بنكي</a>
+    <nav>
+      <a href="/" class="{{ 'active' if path == '/' }}">الرئيسية</a>
+      <a href="/transactions" class="{{ 'active' if path.startswith('/transactions') and path != '/transactions/new' }}">المعاملات</a>
+      <a href="/import" class="{{ 'active' if path.startswith('/import') }}">استيراد</a>
+      <a href="/accounts" class="{{ 'active' if path == '/accounts' }}">الحسابات</a>
+      <a href="/categories" class="{{ 'active' if path == '/categories' }}">الفئات</a>
+    </nav>
+    <form method="post" action="/logout"><button class="link">خروج</button></form>
+  </header>
+  <a href="/transactions/new" class="fab" aria-label="إضافة معاملة">+</a>
+  {% endif %}
+  <main>
+    {% if flash %}<div class="flash">{{ flash }}</div>{% endif %}
+    {% block content %}{% endblock %}
+  </main>
+  <script>
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block content %}
+{% include "_month_nav.html" %}
+{% if missing_rates %}
+<div class="flash warn">ما في سعر صرف لـ {{ missing_rates|join('، ') }} (ما في إنترنت؟). حطّ سعر يدوي من <a href="/accounts">الحسابات</a>، وإلا هالمبالغ ما بتنحسب بالمجموع.</div>
+{% endif %}
+
+<section class="stats">
+  <div class="stat"><span class="label">الداخل</span><span class="value pos" dir="ltr">{{ income|money }}</span></div>
+  <div class="stat"><span class="label">الطالع</span><span class="value neg" dir="ltr">{{ expense|money }}</span></div>
+  <div class="stat"><span class="label">الصافي</span><span class="value {{ 'pos' if net >= 0 else 'neg' }}" dir="ltr">{{ net|money }}</span></div>
+  <div class="stat"><span class="label">صافي الثروة</span><span class="value" dir="ltr">{{ net_worth|money }}</span></div>
+</section>
+
+<div class="grid">
+  <section class="card">
+    <h2>المصاريف حسب الفئة</h2>
+    {% if categories %}
+      <div class="chart-box"><canvas id="catChart"></canvas></div>
+      <ul class="legend">
+        {% for c in categories %}
+        <li><span class="dot" style="background: {{ c.color }}"></span>{{ c.name }}
+          <span class="muted" dir="ltr">{{ c.total|money }} · {{ (c.total / expense * 100)|round|int }}%</span></li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted">ما في مصاريف هالشهر. <a href="/transactions/new">ضيف معاملة</a> أو <a href="/import">استورد كشف حساب</a>.</p>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <h2>المصاريف اليومية</h2>
+    <div class="chart-box"><canvas id="dailyChart"></canvas></div>
+  </section>
+
+  <section class="card">
+    <h2>الحسابات</h2>
+    <ul class="plain">
+      {% for a in accounts %}
+      <li class="row"><span>{{ a.name }}</span>
+        <span dir="ltr">{{ a.balance|money(a.currency) }}{% if a.currency != 'TRY' %} <span class="muted">≈ {{ a.balance_try|money }}</span>{% endif %}</span></li>
+      {% endfor %}
+    </ul>
+    {% if usd_rate %}<p class="muted small">سعر الدولار: {{ '%.4f'|format(usd_rate) }} ₺ (TCMB)</p>{% endif %}
+  </section>
+
+  <section class="card">
+    <h2>آخر المعاملات</h2>
+    <ul class="tx-list">{% for t in recent %}{% include "_tx_row.html" %}{% else %}<li class="muted">لسا ما في.</li>{% endfor %}</ul>
+    <a href="/transactions?month={{ month }}">كل المعاملات ←</a>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/chart.umd.js"></script>
+<script>
+  const data = {{ chart_json|safe }};
+  const text = getComputedStyle(document.body).getPropertyValue('--text');
+  if (window.Chart) {
+    Chart.defaults.color = text;
+    Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
+    const cat = document.getElementById('catChart');
+    if (cat) new Chart(cat, {
+      type: 'doughnut',
+      data: { labels: data.categories.labels, datasets: [{ data: data.categories.values, backgroundColor: data.categories.colors, borderWidth: 0 }] },
+      options: { plugins: { legend: { display: false } }, cutout: '62%', maintainAspectRatio: false }
+    });
+    new Chart(document.getElementById('dailyChart'), {
+      type: 'bar',
+      data: { labels: data.daily.labels, datasets: [{ data: data.daily.values, backgroundColor: '#0f766e', borderRadius: 3 }] },
+      options: { plugins: { legend: { display: false } }, maintainAspectRatio: false,
+                 scales: { x: { grid: { display: false } }, y: { beginAtZero: true } } }
+    });
+  }
+</script>
+{% endblock %}

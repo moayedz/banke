@@ -1,0 +1,5 @@
+<div class="month-nav">
+  <a href="?month={{ prev_month }}{{ extra_qs|default('') }}" aria-label="الشهر السابق">→</a>
+  <form method="get"><input type="month" name="month" value="{{ month }}" onchange="this.form.submit()"></form>
+  <a href="?month={{ next_month }}{{ extra_qs|default('') }}" aria-label="الشهر الجاي">←</a>
+</div>

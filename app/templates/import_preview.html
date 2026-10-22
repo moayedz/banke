@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card">
+  <h1>معاينة: {{ filename }}</h1>
+  <p class="muted">الحساب: <b>{{ account.name }}</b>. تأكّد إنه الأعمدة صح، وبعدين اضغط استيراد.</p>
+
+  <form method="get" class="mapping">
+    <label>صف العناوين
+      <select name="header_row">
+        <option value="">— اختار —</option>
+        {% for row in sample_rows %}
+        <option value="{{ loop.index0 }}" {{ 'selected' if header_row == loop.index0 }}>{{ loop.index }}: {{ row|select|join(' | ')|truncate(60) }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    {% for role, label in roles.items() %}
+    <label>{{ label }}
+      <select name="{{ role }}">
+        <option value="">—</option>
+        {% for h in header_cells %}<option value="{{ loop.index0 }}" {{ 'selected' if mapping.get(role) == loop.index0 }}>{{ h if h not in (None, '') else 'عمود ' ~ loop.index }}</option>{% endfor %}
+      </select>
+    </label>
+    {% endfor %}
+    <button class="secondary">حدّث المعاينة</button>
+  </form>
+</section>
+
+<section class="card">
+  {% if txs %}
+  <p><b>{{ txs|length }}</b> معاملة بالملف، منها <b>{{ new_count }}</b> جديدة.</p>
+  <form method="post" action="/import/{{ token }}/confirm">
+    <input type="hidden" name="header_row" value="{{ header_row }}">
+    {% for role, idx in mapping.items() %}<input type="hidden" name="{{ role }}" value="{{ idx }}">{% endfor %}
+    <button {{ 'disabled' if not new_count }}>استيراد {{ new_count }} معاملة</button>
+  </form>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>التاريخ</th><th>الوصف</th><th>المبلغ</th><th>الفئة</th><th></th></tr></thead>
+      <tbody>
+        {% for t in txs %}
+        <tr class="{{ 'dup' if t.duplicate }}">
+          <td>{{ t.date }}</td><td>{{ t.description }}</td>
+          <td dir="ltr" class="{{ 'pos' if t.amount > 0 else 'neg' }}">{{ t.amount|money(account.currency) }}</td>
+          <td>{{ t.category or '—' }}</td><td class="small">{{ 'موجودة' if t.duplicate }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="error">ما لقيت معاملات. اختار صف العناوين وعمود التاريخ والمبلغ (أو Borç/Alacak) فوق.</p>
+  {% endif %}
+</section>
+{% endblock %}

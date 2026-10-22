@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card">
+  <h1>الحسابات</h1>
+  <p>صافي الثروة: <b dir="ltr">{{ net_worth|money }}</b></p>
+  <p class="muted small">الرصيد = الرصيد الافتتاحي + كل المعاملات. حط الرصيد الافتتاحي بحيث الرصيد يطابق اللي بتطبيق البنك قبل أول معاملة استوردتها.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>الاسم</th><th>العملة</th><th>رصيد افتتاحي</th><th>الرصيد</th><th></th></tr></thead>
+      <tbody>
+      {% for a in accounts %}
+        <tr>
+          <td><input form="acc-{{ a.id }}" name="name" value="{{ a.name }}" required></td>
+          <td>{{ a.currency }}</td>
+          <td><input form="acc-{{ a.id }}" name="opening_balance" value="{{ a.opening_balance }}" inputmode="decimal" dir="ltr" class="num"></td>
+          <td dir="ltr">{{ a.balance|money(a.currency) }}</td>
+          <td><button form="acc-{{ a.id }}" class="secondary small">حفظ</button></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% for a in accounts %}<form id="acc-{{ a.id }}" method="post" action="/accounts/{{ a.id }}/edit"></form>{% endfor %}
+  {% for a in accounts if a.tx_count == 0 %}
+    {% if loop.first %}<p class="muted small">حسابات فاضية ممكن تنحذف:</p>{% endif %}
+    <form method="post" action="/accounts/{{ a.id }}/delete" class="inline" onsubmit="return confirm('حذف {{ a.name }}؟')"><button class="danger small">حذف {{ a.name }}</button></form>
+  {% endfor %}
+</section>
+
+<div class="grid">
+<section class="card">
+  <h2>حساب جديد</h2>
+  <form method="post" action="/accounts" class="stack">
+    <label>الاسم<input name="name" required placeholder="مثلًا: ذهب، Papara…"></label>
+    <label>البنك (اختياري)<input name="bank"></label>
+    <label>العملة<select name="currency"><option>TRY</option><option>USD</option><option>EUR</option></select></label>
+    <label>الرصيد الافتتاحي<input name="opening_balance" value="0" inputmode="decimal" dir="ltr"></label>
+    <button>إضافة</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>أسعار الصرف</h2>
+  {% for cur, rate in rates.items() if cur != 'TRY' %}
+    <p dir="ltr">1 {{ cur }} = {{ '%.4f'|format(rate) }} ₺</p>
+  {% endfor %}
+  <p class="muted small">بتتحدّث تلقائيًا كل يوم من البنك المركزي التركي. إذا ما في إنترنت بنستعمل آخر سعر، أو السعر اليدوي تحت.</p>
+  <form method="post" action="/settings/rate" class="stack">
+    <label>سعر الدولار اليدوي (احتياطي)<input name="usd" value="{{ manual_usd }}" inputmode="decimal" dir="ltr"></label>
+    <button class="secondary">حفظ</button>
+  </form>
+  <h2>نسخة احتياطية</h2>
+  <p class="muted small">نزّل نسخة من كل بياناتك واحفظها بمكان آمن (مثلًا ملف مضغوط بكلمة سر).</p>
+  <a class="button secondary" href="/backup">تنزيل نسخة احتياطية</a>
+</section>
+</div>
+{% endblock %}
